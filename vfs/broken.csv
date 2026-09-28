@@ -1,0 +1,4 @@
+path,type,content
+/,directory,
+hello.txt,file,Hello
+/documents,directory

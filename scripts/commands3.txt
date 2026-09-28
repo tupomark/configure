@@ -1,0 +1,11 @@
+ls
+cd documents
+ls
+cd projects
+ls
+cd src
+ls
+cd missing
+cd main.py
+unknown
+exit

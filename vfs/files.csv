@@ -1,0 +1,9 @@
+path,type,content
+/,directory,
+/hello.txt,file,Hello VFS!
+/documents,directory,
+/documents/readme.txt,file,This is a document.
+/documents/projects,directory,
+/documents/projects/project.txt,file,My project
+/documents/projects/src,directory,
+/documents/projects/src/main.py,"file","print(""Hello"")"
