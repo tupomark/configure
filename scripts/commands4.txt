@@ -1,0 +1,17 @@
+ls
+cd documents
+ls
+cd projects
+ls
+cd src
+ls
+whoami
+echo Hello from VFS
+who
+cd missing
+cd main.py
+whoami test
+who test
+ls test
+unknown
+exit

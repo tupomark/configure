@@ -168,6 +168,26 @@ def execute_command(parts, vfs, current_path):
 
         return new_path, True
 
+    if command == "whoami":
+        if arguments:
+            print("Ошибка: команда whoami не принимает аргументы.")
+            return current_path, True
+
+        print("marksuvorov")
+        return current_path, True
+
+    if command == "echo":
+        print(" ".join(arguments))
+        return current_path, True
+
+    if command == "who":
+        if arguments:
+            print("Ошибка: команда who не принимает аргументы.")
+            return current_path, True
+
+        print("marksuvorov")
+        return current_path, True
+
     print("Ошибка: неизвестная команда:", command)
     return current_path, True
 
