@@ -1,0 +1,4 @@
+ls
+cd "hello world"
+abc
+ls
