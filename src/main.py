@@ -4,6 +4,7 @@ import csv
 
 
 VFS_NAME = "demo-vfs"
+CURRENT_USER = "marksuvorov"
 
 
 def parse_arguments():
@@ -50,7 +51,8 @@ def load_vfs(vfs_path):
 
                 vfs[path] = {
                     "type": item_type,
-                    "content": content
+                    "content": content,
+                    "owner": CURRENT_USER
                 }
 
         if "/" not in vfs:
@@ -137,28 +139,64 @@ def change_directory(vfs, current_path, path):
     return new_path
 
 
+def change_owner(vfs, current_path, path, owner):
+    target_path = normalize_path(current_path, path)
+
+    if target_path not in vfs:
+        print("Ошибка: объект не найден.")
+        return
+
+    vfs[target_path]["owner"] = owner
+    print(f"Владелец {target_path}: {owner}")
+
+
+def copy_file(vfs, current_path, source, destination):
+    source_path = normalize_path(current_path, source)
+    destination_path = normalize_path(current_path, destination)
+
+    if source_path not in vfs:
+        print("Ошибка: исходный файл не найден.")
+        return
+
+    if vfs[source_path]["type"] != "file":
+        print("Ошибка: копировать можно только файл.")
+        return
+
+    if destination_path in vfs:
+        print("Ошибка: объект назначения уже существует.")
+        return
+
+    vfs[destination_path] = {
+        "type": "file",
+        "content": vfs[source_path]["content"],
+        "owner": vfs[source_path].get("owner", CURRENT_USER)
+    }
+
+    print(f"Файл скопирован: {destination_path}")
+
+
 def execute_command(parts, vfs, current_path):
     if not parts:
-        return current_path, True
+        return current_path, True, vfs
 
     command = parts[0]
     arguments = parts[1:]
 
     if command == "exit":
-        return current_path, False
+        return current_path, False, vfs
 
     if command == "ls":
         if arguments:
             print("Ошибка: команда ls не принимает аргументы.")
-            return current_path, True
+            return current_path, True, vfs
 
         list_directory(vfs, current_path)
-        return current_path, True
+        return current_path, True, vfs
 
     if command == "cd":
         if len(arguments) != 1:
             print("Ошибка: команда cd требует один аргумент.")
-            return current_path, True
+            return current_path, True, vfs
 
         new_path = change_directory(
             vfs,
@@ -166,30 +204,72 @@ def execute_command(parts, vfs, current_path):
             arguments[0]
         )
 
-        return new_path, True
+        return new_path, True, vfs
 
     if command == "whoami":
         if arguments:
             print("Ошибка: команда whoami не принимает аргументы.")
-            return current_path, True
+            return current_path, True, vfs
 
-        print("marksuvorov")
-        return current_path, True
+        print(CURRENT_USER)
+        return current_path, True, vfs
 
     if command == "echo":
         print(" ".join(arguments))
-        return current_path, True
+        return current_path, True, vfs
 
     if command == "who":
         if arguments:
             print("Ошибка: команда who не принимает аргументы.")
-            return current_path, True
+            return current_path, True, vfs
 
-        print("marksuvorov")
-        return current_path, True
+        print(CURRENT_USER)
+        return current_path, True, vfs
+
+    if command == "chown":
+        if len(arguments) != 2:
+            print("Ошибка: команда chown требует два аргумента.")
+            return current_path, True, vfs
+
+        change_owner(
+            vfs,
+            current_path,
+            arguments[0],
+            arguments[1]
+        )
+
+        return current_path, True, vfs
+
+    if command == "cp":
+        if len(arguments) != 2:
+            print("Ошибка: команда cp требует два аргумента.")
+            return current_path, True, vfs
+
+        copy_file(
+            vfs,
+            current_path,
+            arguments[0],
+            arguments[1]
+        )
+
+        return current_path, True, vfs
+
+    if command == "vfs-load":
+        if len(arguments) != 1:
+            print("Ошибка: команда vfs-load требует один аргумент.")
+            return current_path, True, vfs
+
+        new_vfs = load_vfs(arguments[0])
+
+        if new_vfs is not None:
+            vfs = new_vfs
+            current_path = "/"
+            print("VFS загружен:", arguments[0])
+
+        return current_path, True, vfs
 
     print("Ошибка: неизвестная команда:", command)
-    return current_path, True
+    return current_path, True, vfs
 
 
 def run_script(script_path, vfs):
@@ -208,7 +288,7 @@ def run_script(script_path, vfs):
                 try:
                     parts = parse_command(line)
 
-                    current_path, running = execute_command(
+                    current_path, running, vfs = execute_command(
                         parts,
                         vfs,
                         current_path
@@ -246,7 +326,7 @@ def main():
 
             parts = parse_command(line)
 
-            current_path, running = execute_command(
+            current_path, running, vfs = execute_command(
                 parts,
                 vfs,
                 current_path

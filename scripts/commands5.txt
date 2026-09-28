@@ -1,0 +1,21 @@
+ls
+whoami
+echo Stage 5
+who
+cp hello.txt copy.txt
+ls
+chown copy.txt student
+cp missing.txt copy2.txt
+cp documents copy2.txt
+cp hello.txt copy.txt
+chown missing.txt student
+chown copy.txt
+chown copy.txt student
+vfs-load ./vfs/minimal.csv
+ls
+cd documents
+vfs-load ./vfs/files.csv
+ls
+vfs-load ./vfs/broken.csv
+unknown
+exit
