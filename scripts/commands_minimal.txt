@@ -1,0 +1,6 @@
+ls
+cd documents
+whoami
+echo Minimal VFS
+who
+exit
