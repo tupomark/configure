@@ -30,6 +30,7 @@ class GraphBuilder:
         """Начать DFS; корень находится на глубине 0."""
         if self._excluded(name):
             raise ValueError("Корневой пакет исключён фильтром --exclude")
+        version = self.repository.resolve(name, f"[{version}]")
         root = (name.casefold(), normalize(version))
         self._visit(root, ROOT_DEPTH, name)
         return self.graph
@@ -50,7 +51,8 @@ class GraphBuilder:
         if depth >= self.max_depth:
             return
         self.active.add(node)
-        for name, requirement in self.repository.dependencies(source_name, node[1]):
+        dependencies = self.repository.dependencies(source_name, node[1])
+        for name, requirement in dependencies:
             if self._excluded(name):
                 continue
             version = self.repository.resolve(name, requirement)

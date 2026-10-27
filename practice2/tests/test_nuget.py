@@ -30,7 +30,8 @@ class NugetTests(unittest.TestCase):
         }
         for requirement, expected in cases.items():
             with self.subTest(requirement=requirement):
-                self.assertEqual(select_version(versions, requirement), expected)
+                actual = select_version(versions, requirement)
+                self.assertEqual(actual, expected)
         for bad in ["[9]", "(1)", "[2,1]", "[1"]:
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 select_version(versions, bad)

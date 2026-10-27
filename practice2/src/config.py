@@ -23,7 +23,9 @@ def package_id(value):
 def version(value):
     """Проверить конкретную версию, а не диапазон."""
     if not re.fullmatch(VERSION_PATTERN, value):
-        raise argparse.ArgumentTypeError("нужна конкретная версия, например 1.0.0")
+        raise argparse.ArgumentTypeError(
+            "нужна конкретная версия, например 1.0.0"
+        )
     return value
 
 
@@ -75,9 +77,13 @@ def parse_arguments(argv=None):
     parser = argparse.ArgumentParser(description="NuGet: ПР2, вариант 31")
     parser.add_argument("--package", required=True, type=package_id)
     parser.add_argument("--version", required=True, type=version)
-    parser.add_argument("--repository", default="https://api.nuget.org/v3/index.json")
+    parser.add_argument(
+        "--repository", default="https://api.nuget.org/v3/index.json",
+    )
     parser.add_argument("--test-repo", action="store_true")
-    parser.add_argument("--output", type=output_path, default=Path("output/graph.png"))
+    parser.add_argument(
+        "--output", type=output_path, default=Path("output/graph.png"),
+    )
     parser.add_argument("--max-depth", type=depth, default=3)
     parser.add_argument("--exclude", type=nonempty, default=None)
     parser.add_argument("--stage", type=int, choices=range(1, 6), default=1)

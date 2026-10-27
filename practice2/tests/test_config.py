@@ -28,7 +28,8 @@ class ConfigTests(unittest.TestCase):
             ["--exclude", ""], ["--test-repo", "yes"],
         ]
         for case in cases:
-            with self.subTest(case=case), contextlib.redirect_stderr(io.StringIO()):
-                with self.assertRaises(SystemExit) as result:
-                    parse_arguments(BASE + case)
-                self.assertEqual(result.exception.code, 2)
+            with self.subTest(case=case):
+                with contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit) as result:
+                        parse_arguments(BASE + case)
+                    self.assertEqual(result.exception.code, 2)

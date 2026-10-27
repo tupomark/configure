@@ -1,0 +1,39 @@
+name: Practice 2 variant 31
+on:
+  push:
+    paths:
+      - 'practice2/**'
+      - '.github/workflows/practice2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: practice2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Install D2 renderer
+        run: curl -fsSL https://d2lang.com/install.sh | sh -s --
+      - name: Compare three real packages
+        run: python3 -m scripts.demonstrate
+      - name: Render cycle example
+        run: >-
+          sh run.sh --package A --version 1 --test-repo
+          --repository examples/cycle.json --stage 5
+          --output output/cycle.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: practice2-variant31-results
+          path: practice2/output/

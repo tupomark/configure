@@ -40,7 +40,9 @@ def parse_nuspec(data, framework=None):
         ]
         if groups and not selected:
             names = [group.get("targetFramework", "") for group in groups]
-            raise ValueError(f"Нет группы {framework}; доступны: {names}")
+            raise ValueError(
+                f"Нет группы {framework}; доступны: {names}"
+            )
     elements = list(dependencies.findall("dependency"))
     for group in selected:
         elements.extend(group.findall("dependency"))

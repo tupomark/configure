@@ -38,7 +38,10 @@ def compare(name, version, graph):
         for framework in item["frameworks"]:
             for kind in ("topLevelPackages", "transitivePackages"):
                 for package in framework.get(kind, []):
-                    native.add((package["id"].lower(), package["resolvedVersion"]))
+                    node = (
+                        package["id"].lower(), package["resolvedVersion"],
+                    )
+                    native.add(node)
     ours = set(graph.edges)
     return {"package": name, "version": version, "equal": ours == native,
             "only_graph": sorted(ours - native),

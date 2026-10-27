@@ -14,7 +14,9 @@ class TestRepository:
         """Прочитать файл и проверить все записи, включая недостижимые."""
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         if not isinstance(data, dict) or not data:
-            raise ValueError("Тестовый репозиторий должен быть непустым объектом")
+            raise ValueError(
+                "Тестовый репозиторий должен быть непустым объектом"
+            )
         self.packages = {}
         for name, versions in data.items():
             self._validate_name(name)
@@ -30,7 +32,9 @@ class TestRepository:
     def _validate_name(name):
         """Потребовать заглавные латинские буквы."""
         if not re.fullmatch(r"[A-Z]+", name):
-            raise ValueError(f"Имя тестового пакета должно состоять из A-Z: {name}")
+            raise ValueError(
+                f"Имя тестового пакета должно состоять из A-Z: {name}"
+            )
 
     def _read_versions(self, versions):
         """Нормализовать версии и проверить списки зависимостей."""
@@ -38,7 +42,9 @@ class TestRepository:
         for version, dependencies in versions.items():
             key = normalize(version)
             if key in result or not isinstance(dependencies, dict):
-                raise ValueError("Повторная версия или неверный объект зависимостей")
+                raise ValueError(
+                    "Повторная версия или неверный объект зависимостей"
+                )
             for name, requirement in dependencies.items():
                 self._validate_name(name)
                 if not isinstance(requirement, str):
