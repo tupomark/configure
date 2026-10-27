@@ -54,3 +54,14 @@ def local_arguments(example="cycle", package="A", *extra):
         "--package", package, "--version", "1", "--test-repo",
         "--repository", ROOT / "examples" / f"{example}.json", *extra,
     ]
+
+
+def expect_graph(output, edges=(), leaves=()):
+    """Сверить точные рёбра и листья демонстрационного графа версии 1."""
+    expected = {
+        f"{source}@1.0.0 -> {target}@1.0.0" for source, target in edges
+    }
+    expected.update(f"{name}@1.0.0" for name in leaves)
+    actual = {line for line in output.splitlines() if "@" in line}
+    if actual != expected:
+        raise AssertionError(f"Граф {actual}; ожидался {expected}")
