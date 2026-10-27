@@ -30,20 +30,26 @@ def execute(args):
     graph = GraphBuilder(repo, args.max_depth, args.exclude).build(
         args.package, args.version,
     )
-    if args.stage == 4 or args.reverse:
-        if args.test_repo:
-            graph = test_universe(repo, args.max_depth, args.exclude)
-        version = None if args.reverse else normalize(args.version)
-        graph = reverse_graph(
-            graph, args.reverse or args.package, args.max_depth, version,
-        )
-        print("Обратные зависимости в области анализа:")
+    graph = apply_reverse(args, repo, graph)
     for line in graph_lines(graph):
         print(line)
     if args.stage == 5:
         source = render_graph(graph, args.output)
         print(f"D2: {source}; PNG: {args.output}")
     print(f"Узлов: {len(graph.edges)}; циклических рёбер: {len(graph.cycles)}")
+
+
+def apply_reverse(args, repo, graph):
+    """Выбрать область и выполнить дополнительную операцию этапа 4."""
+    if args.stage != 4 and not args.reverse:
+        return graph
+    if args.test_repo:
+        graph = test_universe(repo, args.max_depth, args.exclude)
+    version = None if args.reverse else normalize(args.version)
+    print("Обратные зависимости в области анализа:")
+    return reverse_graph(
+        graph, args.reverse or args.package, args.max_depth, version,
+    )
 
 
 def main(argv=None):

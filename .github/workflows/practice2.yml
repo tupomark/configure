@@ -32,6 +32,11 @@ jobs:
           sh run.sh --package A --version 1 --test-repo
           --repository examples/cycle.json --stage 5
           --output output/cycle.png
+      - name: Print README in Chromium
+        run: |
+          pip install markdown playwright
+          playwright install --with-deps chromium
+          python3 -m scripts.export_readme
       - uses: actions/upload-artifact@v4
         if: always()
         with:

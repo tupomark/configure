@@ -97,3 +97,86 @@ Serilog.Formatting.Compact 3.0.0. Для каждого сохраняются D
 конфликтов версий и ограничения глубины. В графе сохраняются разные версии
 одного пакета, а правила direct-dependency-wins не применяются.
 PNG и PDF не коммитятся: это бинарные результаты работы.
+
+## Установка и структура
+
+```sh
+git clone https://github.com/tupomark/configure.git
+cd configure/practice2
+python3 --version
+python3 -m unittest discover -s tests -v
+```
+
+Исходный код: `src/`; тесты: `tests/`; локальные репозитории: `examples/`;
+сценарий сравнения: `scripts/demonstrate.py`; запуск: `run.sh`.
+Python-зависимости для работы приложения и тестов устанавливать не нужно.
+Для реальной сети нужен доступ к URL индекса и PackageBaseAddress.
+Сборка не нужна: Python исполняет исходные файлы.
+
+| Параметр | Значение и проверка |
+| --- | --- |
+| `--package` | Обязательное имя NuGet; в тестовом режиме только A-Z |
+| `--version` | Обязательная конкретная версия корня, не диапазон |
+| `--repository` | HTTP(S) индекс NuGet V3 либо JSON с `--test-repo` |
+| `--test-repo` | Флаг, переключающий источник на локальный JSON |
+| `--output` | PNG-путь; по умолчанию `output/graph.png` |
+| `--max-depth` | Целое 0-100; по умолчанию 3; корень на глубине 0 |
+| `--exclude` | Непустая исключаемая подстрока без учёта регистра |
+| `--stage` | Этап 1-5; по умолчанию 1 для показа конфигурации |
+| `--framework` | Точное имя группы nuspec; без параметра объединение |
+| `--reverse` | Имя пакета для обратного обхода внутри области анализа |
+
+Ошибки аргументов возвращают код 2. Сетевые, XML/JSON и файловые ошибки,
+отсутствие версии и сбой D2 возвращают код 1. Успех возвращает код 0.
+Родительские каталоги результата создаются автоматически.
+
+## Функции и классы
+
+| Модуль | Назначение функций |
+| --- | --- |
+| `config` | `package_id`, `version`, `depth`, `nonempty`, `output_path`: проверка значений |
+| `config` | `validate_source`: проверка источника; `parse_arguments`: разбор CLI |
+| `versions` | `version_key`: сортировка; `normalize`: нормализация URL-версий |
+| `versions` | `range_bounds`, `exact_bounds`, `satisfies`: интервалы; `select_version`: выбор |
+| `nuget` | `fetch_bytes`: HTTP; `parse_nuspec`, `select_groups`: XML и framework |
+| `nuget` | `NugetRepository`: индекс, кэш, `versions`, `resolve`, `dependencies` |
+| `test_repository` | `TestRepository`: проверка JSON, `resolve`, `dependencies` |
+| `graph` | `Graph`: данные; `GraphBuilder.build`, `_visit`: DFS; `_excluded`: фильтр |
+| `graph` | `graph_lines`: стабильный текстовый вывод графа |
+| `reverse` | `merge_graphs`: объединение; `test_universe`: все локальные версии |
+| `reverse` | `ReversedRepository`: адаптер; `reverse_graph`: обратный DFS |
+| `visualize` | `to_d2`: текст диаграммы; `render_graph`: файлы D2 и PNG |
+| `main` | `execute`: этапы; `apply_reverse`: обратный обход; `main`: ошибки и код выхода |
+| `scripts.demonstrate` | `command`, `compare`, `main`: независимая проверка через dotnet |
+| `scripts.export_readme` | `main`: печать README в Chromium, аналог Ctrl+P |
+
+Числовые версии нормализуются до трёх или четырёх частей; build-метаданные
+не участвуют в сравнении. Поддерживаются bare minimum, `[exact]`, интервалы
+с открытыми границами, `*` и числовой floating-суффикс `1.*`.
+Для обычного диапазона выбирается минимальная подходящая версия;
+для floating выбирается максимальная стабильная. Prerelease допускается,
+когда он явно присутствует в требовании. Экзотические floating-выражения
+вроде `1.0.0-rc.*` не поддерживаются и возвращают ошибку.
+
+## Проверка требований и сдача
+
+Пять этапов сохранены отдельными Conventional Commits на английском.
+Изменения после этапов также фиксируются отдельными коммитами.
+ПР1 находится в корне репозитория, ПР2 - в отдельном каталоге `practice2`.
+
+В GitHub Actions workflow `Practice 2 variant 31` выполняются тесты,
+три реальные визуализации и сравнение с dotnet для точной группы `net8.0`.
+Результаты доступны в артефакте `practice2-variant31-results`:
+D2, PNG, текст графа, штатный JSON и `comparison.json`.
+Для выбранных трёх пакетов сравниваются точные наборы имя/версия.
+Стандартный вывод dotnet показывает список зависимостей; D2 показывает
+направленные связи между ними. Геометрическое расположение не сравнивается.
+
+Для PDF вручную: открыть README этой работы на GitHub, нажать Ctrl+P
+(на Mac Cmd+P), выбрать «Сохранить как PDF». Сценарий `export_readme`
+также печатает ту же Markdown-версию через Chromium.
+В СДО загрузить PDF и указать URL:
+https://github.com/tupomark/configure/tree/main/practice2
+
+Сгенерированные изображения, PDF, архивы, `__pycache__`, настройки IDE,
+`bin` и `obj` исключены через `.gitignore`.

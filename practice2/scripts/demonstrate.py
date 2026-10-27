@@ -51,7 +51,9 @@ def compare(name, version, graph):
 def main():
     """Сохранить PNG, D2, фактические графы и результаты сравнения."""
     OUTPUT.mkdir(exist_ok=True)
-    repository = NugetRepository("https://api.nuget.org/v3/index.json")
+    repository = NugetRepository(
+        "https://api.nuget.org/v3/index.json", framework="net8.0",
+    )
     results = []
     for name, version in PACKAGES:
         graph = GraphBuilder(repository, 10).build(name, version)
