@@ -1,3 +1,4 @@
-#!/bin/bash
-
-python3 src/main.py --vfs ./vfs/files.csv
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")"
+exec python3 -m src.main "$@"
