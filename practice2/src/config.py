@@ -1,11 +1,25 @@
 """Параметры командной строки и проверка их значений."""
 
 import argparse
+from enum import IntEnum
 import re
 from pathlib import Path
 from urllib.parse import urlparse
 
+MIN_DEPTH = 0
 MAX_DEPTH = 100
+
+
+class Stage(IntEnum):
+    """Номера этапов из задания варианта 31."""
+
+    CONFIG = 1
+    DIRECT = 2
+    GRAPH = 3
+    REVERSE = 4
+    VISUALIZE = 5
+
+
 ID_PATTERN = r"[A-Za-z0-9_][A-Za-z0-9_.-]*"
 VERSION_PATTERN = (
     r"\d+(?:\.\d+){0,3}(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?"
@@ -35,7 +49,7 @@ def depth(value):
         result = int(value)
     except ValueError as error:
         raise argparse.ArgumentTypeError("глубина должна быть целой") from error
-    if not 0 <= result <= MAX_DEPTH:
+    if not MIN_DEPTH <= result <= MAX_DEPTH:
         raise argparse.ArgumentTypeError(f"глубина должна быть 0..{MAX_DEPTH}")
     return result
 
@@ -86,7 +100,9 @@ def parse_arguments(argv=None):
     )
     parser.add_argument("--max-depth", type=depth, default=3)
     parser.add_argument("--exclude", type=nonempty, default=None)
-    parser.add_argument("--stage", type=int, choices=range(1, 6), default=1)
+    parser.add_argument(
+        "--stage", type=int, choices=list(Stage), default=Stage.CONFIG,
+    )
     parser.add_argument("--reverse", type=package_id)
     parser.add_argument("--framework", type=nonempty)
     args = parser.parse_args(argv)

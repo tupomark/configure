@@ -33,6 +33,7 @@ jobs:
           --repository examples/cycle.json --stage 5
           --output output/cycle.png
       - name: Print README in Chromium
+        if: always()
         run: |
           pip install markdown playwright
           playwright install --with-deps chromium

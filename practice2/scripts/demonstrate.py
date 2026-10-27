@@ -17,16 +17,23 @@ OUTPUT = Path("output")
 
 def command(arguments, cwd=None):
     """Выполнить штатный инструмент и сохранить ошибки в журнале."""
-    return subprocess.check_output(
-        arguments, cwd=cwd, text=True, stderr=subprocess.STDOUT,
-    )
+    try:
+        return subprocess.check_output(
+            arguments, cwd=cwd, text=True, stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as error:
+        print(error.output)
+        raise
 
 
 def compare(name, version, graph):
     """Сравнить набор package/version со штатным выводом .NET SDK 8."""
     project = OUTPUT / name
     project.mkdir(parents=True, exist_ok=True)
-    command(["dotnet", "new", "classlib", "-f", "net8.0", "--force"], project)
+    command([
+        "dotnet", "new", "classlib", "-f", "net8.0", "--force",
+        "--name", "DependencyComparison", "--output", ".",
+    ], project)
     command(["dotnet", "add", "package", name, "--version", version], project)
     raw = command([
         "dotnet", "list", "package", "--include-transitive", "--format", "json",
