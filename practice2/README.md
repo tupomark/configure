@@ -15,3 +15,17 @@
 
 Сборка не требуется. Запуск тестов:
 `python3 -m unittest discover -s tests -v`.
+
+## Этап 2. Получение данных
+
+`sh run.sh --package Serilog --version 4.0.0 --stage 2`
+
+Индекс NuGet V3 указывает адрес PackageBaseAddress.
+Программа читает XML `.nuspec` указанной версии и выводит прямые зависимости.
+По умолчанию объединяются все объявленные framework-группы.
+`--framework` выбирает точное имя группы из nuspec.
+Функции `parse_nuspec`, `select_version`, `normalize` обрабатывают XML и версии.
+Класс `NugetRepository` получает и кэширует данные.
+
+Основание: [NuGet API](https://learn.microsoft.com/en-us/nuget/api/package-base-address-resource),
+[версии NuGet](https://learn.microsoft.com/en-us/nuget/concepts/package-versioning).
