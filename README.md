@@ -29,3 +29,22 @@
 
 Основание: [NuGet API](https://learn.microsoft.com/en-us/nuget/api/package-base-address-resource),
 [версии NuGet](https://learn.microsoft.com/en-us/nuget/concepts/package-versioning).
+
+## Этап 3. Граф
+
+```sh
+sh run.sh --package A --version 1 --test-repo \
+  --repository examples/cycle.json --stage 3
+sh run.sh --package A --version 1 --test-repo \
+  --repository examples/diamond.json --max-depth 3 --stage 3
+sh run.sh --package A --version 1 --test-repo \
+  --repository examples/diamond.json --exclude D --stage 3
+```
+
+`GraphBuilder.build` использует рекурсивный DFS. Корень имеет глубину 0.
+На границе глубины вершина сохраняется, но не раскрывается.
+Фильтр исключает пакет и обход через него; регистр не важен.
+Замыкающее ребро цикла сохраняется. Повторно найденный более короткий путь
+позволяет раскрыть общую вершину глубже (пример diamond).
+`TestRepository` читает JSON: пакет → версия → зависимости с диапазонами.
+`graph_lines` выводит граф в устойчивом порядке.
