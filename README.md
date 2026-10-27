@@ -26,3 +26,11 @@ sh run.sh --package A --version 1 --test-repo \
 ```
 
 Подробные команды запуска и тестирования находятся в README каждой работы.
+
+## Отдельные ветки практических работ
+
+- [Практическая работа №1, вариант 31](https://github.com/tupomark/configure/tree/practice1-variant31)
+- [Практическая работа №2, вариант 31](https://github.com/tupomark/configure/tree/practice2-variant31)
+
+В каждой отдельной ветке файлы соответствующей работы расположены в корне.
+Ветка `main` содержит обе работы в папках `practice1` и `practice2`.
