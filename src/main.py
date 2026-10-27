@@ -1,6 +1,7 @@
 """Точка входа CLI с режимами демонстрации этапов."""
 
 import sys
+import subprocess
 from xml.etree.ElementTree import ParseError
 
 from .config import parse_arguments
@@ -9,6 +10,7 @@ from .nuget import NugetRepository
 from .test_repository import TestRepository
 from .reverse import reverse_graph, test_universe
 from .versions import normalize
+from .visualize import render_graph
 
 
 def execute(args):
@@ -38,6 +40,9 @@ def execute(args):
         print("Обратные зависимости в области анализа:")
     for line in graph_lines(graph):
         print(line)
+    if args.stage == 5:
+        source = render_graph(graph, args.output)
+        print(f"D2: {source}; PNG: {args.output}")
     print(f"Узлов: {len(graph.edges)}; циклических рёбер: {len(graph.cycles)}")
 
 
@@ -46,7 +51,8 @@ def main(argv=None):
     args = parse_arguments(argv)
     try:
         execute(args)
-    except (OSError, ValueError, KeyError, TypeError, ParseError) as error:
+    except (OSError, ValueError, KeyError, TypeError, ParseError,
+            subprocess.TimeoutExpired) as error:
         print(f"Ошибка: {error}", file=sys.stderr)
         return 1
     return 0

@@ -64,3 +64,36 @@ sh run.sh --package E --version 1 --test-repo \
 Для реального NuGet поиск ограничен графом от `--package`.
 `--reverse NAME` выбирает пакет внутри этой области (все найденные версии).
 Полный поиск потребителей во всём NuGet V3 не предоставляется API.
+
+## Этап 5. Визуализация
+
+Нужен установленный CLI [D2](https://d2lang.com/tour/install/).
+На macOS: `brew install d2`. Проверка: `d2 --version`.
+
+```sh
+sh run.sh --package A --version 1 --test-repo \
+  --repository examples/cycle.json --stage 5 --output output/cycle.png
+```
+
+`to_d2` создаёт текст D2. `render_graph` сохраняет `.d2` и вызывает D2
+для создания `.png`. Без D2 текст сохраняется, программа возвращает ошибку.
+Готовые средства получения зависимостей не используются: D2 только рисует.
+
+Три реальные демонстрации и сравнение с .NET SDK 8:
+
+```sh
+python3 -m scripts.demonstrate
+```
+
+Пакеты: Serilog.Sinks.Console 6.0.0, Serilog.Sinks.File 6.0.0,
+Serilog.Formatting.Compact 3.0.0. Для каждого сохраняются D2, PNG,
+текст графа и штатный JSON `dotnet list package --include-transitive`.
+Сравнение множеств пакет/версия записывается в `output/comparison.json`.
+Менеджер dotnet используется только для независимого сравнения.
+
+Граф объявленных зависимостей не является полной копией NuGet restore.
+По умолчанию объединяются framework-группы; dotnet выбирает совместимую
+с целевым framework. Возможны отличия из-за выбора групп, разрешения
+конфликтов версий и ограничения глубины. В графе сохраняются разные версии
+одного пакета, а правила direct-dependency-wins не применяются.
+PNG и PDF не коммитятся: это бинарные результаты работы.
