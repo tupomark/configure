@@ -31,16 +31,7 @@ def parse_nuspec(data, framework=None):
     dependencies = metadata.find("dependencies")
     if dependencies is None:
         return []
-    groups = list(dependencies.findall("group"))
-    selected = groups
-    if framework:
-        selected = [
-            group for group in groups
-            if group.get("targetFramework", "").casefold() == framework.casefold()
-        ]
-        if groups and not selected:
-            names = [group.get("targetFramework", "") for group in groups]
-            raise ValueError(f"Нет группы {framework}; доступны: {names}")
+    selected = select_groups(dependencies, framework)
     elements = list(dependencies.findall("dependency"))
     for group in selected:
         elements.extend(group.findall("dependency"))
@@ -51,6 +42,20 @@ def parse_nuspec(data, framework=None):
             raise ValueError("У зависимости отсутствует id")
         result.add((name, item.get("version", "*")))
     return sorted(result, key=lambda pair: (pair[0].casefold(), pair[1]))
+
+
+def select_groups(dependencies, framework):
+    """Выбрать точную framework-группу или все объявленные группы."""
+    groups = list(dependencies.findall("group"))
+    if not framework:
+        return groups
+    selected = [group for group in groups if
+                group.get("targetFramework", "").casefold()
+                == framework.casefold()]
+    if groups and not selected:
+        names = [group.get("targetFramework", "") for group in groups]
+        raise ValueError(f"Нет группы {framework}; доступны: {names}")
+    return selected
 
 
 class NugetRepository:

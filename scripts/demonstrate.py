@@ -17,16 +17,23 @@ OUTPUT = Path("output")
 
 def command(arguments, cwd=None):
     """Выполнить штатный инструмент и сохранить ошибки в журнале."""
-    return subprocess.check_output(
-        arguments, cwd=cwd, text=True, stderr=subprocess.STDOUT,
-    )
+    try:
+        return subprocess.check_output(
+            arguments, cwd=cwd, text=True, stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as error:
+        print(error.output)
+        raise
 
 
 def compare(name, version, graph):
     """Сравнить набор package/version со штатным выводом .NET SDK 8."""
     project = OUTPUT / name
     project.mkdir(parents=True, exist_ok=True)
-    command(["dotnet", "new", "classlib", "-f", "net8.0", "--force"], project)
+    command([
+        "dotnet", "new", "classlib", "-f", "net8.0", "--force",
+        "--name", "DependencyComparison", "--output", ".",
+    ], project)
     command(["dotnet", "add", "package", name, "--version", version], project)
     raw = command([
         "dotnet", "list", "package", "--include-transitive", "--format", "json",
@@ -38,7 +45,10 @@ def compare(name, version, graph):
         for framework in item["frameworks"]:
             for kind in ("topLevelPackages", "transitivePackages"):
                 for package in framework.get(kind, []):
-                    native.add((package["id"].lower(), package["resolvedVersion"]))
+                    node = (
+                        package["id"].lower(), package["resolvedVersion"],
+                    )
+                    native.add(node)
     ours = set(graph.edges)
     return {"package": name, "version": version, "equal": ours == native,
             "only_graph": sorted(ours - native),
@@ -48,7 +58,9 @@ def compare(name, version, graph):
 def main():
     """Сохранить PNG, D2, фактические графы и результаты сравнения."""
     OUTPUT.mkdir(exist_ok=True)
-    repository = NugetRepository("https://api.nuget.org/v3/index.json")
+    repository = NugetRepository(
+        "https://api.nuget.org/v3/index.json", framework="net8.0",
+    )
     results = []
     for name, version in PACKAGES:
         graph = GraphBuilder(repository, 10).build(name, version)

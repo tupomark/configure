@@ -43,10 +43,7 @@ def range_bounds(requirement):
             raise ValueError(f"Незакрытый диапазон: {value}")
         inside = value[1:-1]
         if "," not in inside:
-            if value.startswith("[") and value.endswith("]") and inside:
-                key = version_key(inside)
-                return key, key, True, True
-            raise ValueError(f"Некорректный диапазон: {value}")
+            return exact_bounds(value, inside)
         lower, upper = (part.strip() for part in inside.split(",", 1))
         return (
             version_key(lower) if lower else None,
@@ -54,6 +51,14 @@ def range_bounds(requirement):
             value.startswith("["), value.endswith("]"),
         )
     return version_key(value), None, True, False
+
+
+def exact_bounds(value, inside):
+    """Проверить квадратные скобки точного диапазона."""
+    if value.startswith("[") and value.endswith("]") and inside:
+        key = version_key(inside)
+        return key, key, True, True
+    raise ValueError(f"Некорректный диапазон: {value}")
 
 
 def satisfies(value, bounds):
