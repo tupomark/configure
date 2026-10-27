@@ -48,3 +48,19 @@ sh run.sh --package A --version 1 --test-repo \
 позволяет раскрыть общую вершину глубже (пример diamond).
 `TestRepository` читает JSON: пакет → версия → зависимости с диапазонами.
 `graph_lines` выводит граф в устойчивом порядке.
+
+## Этап 4. Обратные зависимости
+
+```sh
+sh run.sh --package B --version 1 --test-repo \
+  --repository examples/cycle.json --stage 4
+sh run.sh --package E --version 1 --test-repo \
+  --repository examples/cycle.json --stage 4
+```
+
+`test_universe` обходит все версии тестового репозитория.
+`ReversedRepository` обращает рёбра; `reverse_graph` использует DFS этапа 3.
+Для B находятся A, C и D; для E потребителей нет.
+Для реального NuGet поиск ограничен графом от `--package`.
+`--reverse NAME` выбирает пакет внутри этой области (все найденные версии).
+Полный поиск потребителей во всём NuGet V3 не предоставляется API.
