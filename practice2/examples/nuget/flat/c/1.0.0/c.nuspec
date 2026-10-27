@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>C</id>
+    <version>1.0.0</version>
+    <dependencies>
+      <group targetFramework="net8.0">
+      </group>
+    </dependencies>
+  </metadata>
+</package>
